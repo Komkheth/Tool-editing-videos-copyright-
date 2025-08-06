@@ -1,4 +1,3 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,7 +6,6 @@
   <title>FB Video Editor - Login</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* Common styles for both options */
     body {
       background: #f0f2f5;
       font-family: 'Segoe UI', sans-serif;
@@ -25,9 +23,51 @@
       width: 350px;
       text-align: center;
     }
-    /* ... (other styles from previous examples) ... */
-    
-    /* Toggle switch */
+    .logo {
+      color: #1877f2;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border: 1px solid #dddfe2;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #1877f2;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:hover { background: #166fe5; }
+    .divider {
+      margin: 15px 0;
+      border-top: 1px solid #dddfe2;
+      position: relative;
+    }
+    .divider span {
+      background: white;
+      padding: 0 10px;
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #65676b;
+    }
+    .error {
+      color: #ff4d4d;
+      font-size: 14px;
+      margin-top: 10px;
+    }
     .auth-toggle {
       display: flex;
       margin-bottom: 20px;
@@ -45,6 +85,40 @@
       background: #1877f2;
       color: white;
     }
+    .remember-me {
+      display: flex;
+      align-items: center;
+      margin: 10px 0;
+      font-size: 14px;
+    }
+    .remember-me input {
+      width: auto;
+      margin-right: 8px;
+    }
+    .forgot-password {
+      text-align: right;
+      margin: 5px 0 15px;
+    }
+    .forgot-password a {
+      color: #1877f2;
+      text-decoration: none;
+      font-size: 13px;
+    }
+    .social-login {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    .social-btn {
+      flex: 1;
+      padding: 10px;
+      border-radius: 6px;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .facebook-btn { background: #3b5998; }
+    .google-btn { background: #db4437; }
   </style>
 </head>
 <body>
@@ -62,6 +136,10 @@
     <div id="simpleAuthForm">
       <input type="text" id="simpleUsername" placeholder="Username">
       <input type="password" id="simplePassword" placeholder="Password">
+      <div class="remember-me">
+        <input type="checkbox" id="simpleRemember">
+        <label for="simpleRemember">Remember me</label>
+      </div>
       <button onclick="simpleLogin()">Log In</button>
       <p id="simpleError" class="error"></p>
     </div>
@@ -70,49 +148,43 @@
     <div id="firebaseAuthForm" style="display:none;">
       <input type="email" id="firebaseEmail" placeholder="Email">
       <input type="password" id="firebasePassword" placeholder="Password">
+      <div class="remember-me">
+        <input type="checkbox" id="firebaseRemember">
+        <label for="firebaseRemember">Remember me</label>
+      </div>
+      <div class="forgot-password">
+        <a href="#" onclick="showResetPassword()">Forgot password?</a>
+      </div>
       <button onclick="firebaseLogin()">Log In</button>
       <div class="divider"><span>or</span></div>
+      <div class="social-login">
+        <button class="social-btn facebook-btn" onclick="facebookLogin()">
+          <i class="fab fa-facebook-f"></i> Facebook
+        </button>
+        <button class="social-btn google-btn" onclick="googleLogin()">
+          <i class="fab fa-google"></i> Google
+        </button>
+      </div>
       <button style="background: #42b72a;" onclick="firebaseSignUp()">Create Account</button>
       <p id="firebaseError" class="error"></p>
     </div>
+
+    <!-- Password Reset Form (Hidden by default) -->
+    <div id="resetPasswordForm" style="display:none;">
+      <h3>Reset Password</h3>
+      <input type="email" id="resetEmail" placeholder="Your email">
+      <button onclick="sendPasswordReset()">Send Reset Link</button>
+      <button style="background: #65676b; margin-top: 10px;" onclick="hideResetPassword()">Cancel</button>
+      <p id="resetError" class="error"></p>
+    </div>
   </div>
 
-  <!-- Firebase SDK (loaded but only used if Firebase auth selected) -->
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   
   <script>
-    // Toggle between auth methods
-    document.getElementById('simpleAuth').addEventListener('click', () => {
-      document.getElementById('simpleAuth').classList.add('active');
-      document.getElementById('firebaseAuth').classList.remove('active');
-      document.getElementById('simpleAuthForm').style.display = 'block';
-      document.getElementById('firebaseAuthForm').style.display = 'none';
-    });
-    
-    document.getElementById('firebaseAuth').addEventListener('click', () => {
-      document.getElementById('firebaseAuth').classList.add('active');
-      document.getElementById('simpleAuth').classList.remove('active');
-      document.getElementById('firebaseAuthForm').style.display = 'block';
-      document.getElementById('simpleAuthForm').style.display = 'none';
-    });
-
-    // Simple Auth (Option 1)
-    function simpleLogin() {
-      const username = document.getElementById('simpleUsername').value;
-      const password = document.getElementById('simplePassword').value;
-      
-      if (username && password) {
-        // Store in sessionStorage
-        sessionStorage.setItem('simpleAuth', 'true');
-        sessionStorage.setItem('username', username);
-        window.location.href = 'editor.html';
-      } else {
-        document.getElementById('simpleError').textContent = 'Please enter both fields';
-      }
-    }
-
-    // Firebase Auth (Option 2)
+    // Firebase Configuration
     const firebaseConfig = {
       apiKey: "YOUR_API_KEY",
       authDomain: "YOUR_AUTH_DOMAIN",
@@ -123,11 +195,59 @@
     };
     firebase.initializeApp(firebaseConfig);
 
+    // Toggle between auth methods
+    document.getElementById('simpleAuth').addEventListener('click', () => {
+      document.getElementById('simpleAuth').classList.add('active');
+      document.getElementById('firebaseAuth').classList.remove('active');
+      document.getElementById('simpleAuthForm').style.display = 'block';
+      document.getElementById('firebaseAuthForm').style.display = 'none';
+      document.getElementById('resetPasswordForm').style.display = 'none';
+    });
+    
+    document.getElementById('firebaseAuth').addEventListener('click', () => {
+      document.getElementById('firebaseAuth').classList.add('active');
+      document.getElementById('simpleAuth').classList.remove('active');
+      document.getElementById('firebaseAuthForm').style.display = 'block';
+      document.getElementById('simpleAuthForm').style.display = 'none';
+      document.getElementById('resetPasswordForm').style.display = 'none';
+    });
+
+    // Simple Auth (Option 1)
+    function simpleLogin() {
+      const username = document.getElementById('simpleUsername').value;
+      const password = document.getElementById('simplePassword').value;
+      const rememberMe = document.getElementById('simpleRemember').checked;
+      
+      if (username && password) {
+        // Store in localStorage if "Remember me" is checked
+        if (rememberMe) {
+          localStorage.setItem('simpleAuth', 'true');
+          localStorage.setItem('username', username);
+        } else {
+          sessionStorage.setItem('simpleAuth', 'true');
+          sessionStorage.setItem('username', username);
+        }
+        window.location.href = 'editor.html';
+      } else {
+        document.getElementById('simpleError').textContent = 'Please enter both fields';
+      }
+    }
+
+    // Firebase Auth (Option 2)
     function firebaseLogin() {
       const email = document.getElementById('firebaseEmail').value;
       const password = document.getElementById('firebasePassword').value;
+      const rememberMe = document.getElementById('firebaseRemember').checked;
       
-      firebase.auth().signInWithEmailAndPassword(email, password)
+      // Set persistence based on "Remember me" selection
+      const persistence = rememberMe ? 
+        firebase.auth.Auth.Persistence.LOCAL : 
+        firebase.auth.Auth.Persistence.SESSION;
+      
+      firebase.auth().setPersistence(persistence)
+        .then(() => {
+          return firebase.auth().signInWithEmailAndPassword(email, password);
+        })
         .then(() => {
           window.location.href = 'editor.html';
         })
@@ -147,6 +267,59 @@
         .catch(error => {
           document.getElementById('firebaseError').textContent = error.message;
         });
+    }
+
+    // Social Logins
+    function facebookLogin() {
+      const provider = new firebase.auth.FacebookAuthProvider();
+      socialLogin(provider);
+    }
+    
+    function googleLogin() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      socialLogin(provider);
+    }
+    
+    function socialLogin(provider) {
+      firebase.auth().signInWithPopup(provider)
+        .then(() => {
+          window.location.href = 'editor.html';
+        })
+        .catch(error => {
+          document.getElementById('firebaseError').textContent = error.message;
+        });
+    }
+
+    // Password Reset
+    function showResetPassword() {
+      document.getElementById('firebaseAuthForm').style.display = 'none';
+      document.getElementById('resetPasswordForm').style.display = 'block';
+    }
+    
+    function hideResetPassword() {
+      document.getElementById('resetPasswordForm').style.display = 'none';
+      document.getElementById('firebaseAuthForm').style.display = 'block';
+    }
+    
+    function sendPasswordReset() {
+      const email = document.getElementById('resetEmail').value;
+      
+      firebase.auth().sendPasswordResetEmail(email)
+        .then(() => {
+          document.getElementById('resetError').textContent = 'Password reset email sent!';
+          document.getElementById('resetError').style.color = '#42b72a';
+          setTimeout(hideResetPassword, 2000);
+        })
+        .catch(error => {
+          document.getElementById('resetError').textContent = error.message;
+          document.getElementById('resetError').style.color = '#ff4d4d';
+        });
+    }
+
+    // Check for remembered simple auth on page load
+    if (localStorage.getItem('simpleAuth')) {
+      document.getElementById('simpleUsername').value = localStorage.getItem('username') || '';
+      document.getElementById('simpleRemember').checked = true;
     }
   </script>
 </body>
