@@ -1,0 +1,61 @@
+<!-- editor.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Same head content as before -->
+  <style>
+    /* Same styles as before */
+  </style>
+</head>
+<body>
+  <!-- Same UI as before -->
+  
+  <!-- Updated scripts -->
+  <script>
+    // Check authentication
+    function checkAuth() {
+      // Check simple auth
+      const simpleAuth = sessionStorage.getItem('simpleAuth');
+      
+      // Check Firebase auth
+      const firebaseUser = firebase.auth().currentUser;
+      
+      if (!simpleAuth && !firebaseUser) {
+        window.location.href = 'index.html';
+      } else if (firebaseUser) {
+        document.getElementById('userAvatar').textContent = 
+          firebaseUser.email.charAt(0).toUpperCase();
+      } else if (simpleAuth) {
+        document.getElementById('userAvatar').textContent = 
+          sessionStorage.getItem('username').charAt(0).toUpperCase();
+      }
+    }
+
+    // Initialize Firebase (same config as login)
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    // Logout function
+    document.querySelector('.logout-btn').addEventListener('click', () => {
+      // Try Firebase logout first
+      if (firebase.auth().currentUser) {
+        firebase.auth().signOut();
+      }
+      // Clear simple auth
+      sessionStorage.removeItem('simpleAuth');
+      window.location.href = 'index.html';
+    });
+
+    // Check auth on load
+    firebase.auth().onAuthStateChanged(checkAuth);
+    checkAuth();
+  </script>
+</body>
+</html>
